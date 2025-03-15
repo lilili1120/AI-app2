@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Planner</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map { height: 500px; width: 100%; }
+        .container { max-width: 600px; margin: auto; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Route Planner</h2>
+        <input type="text" id="start" placeholder="出発地 (例: 35.6895,139.6917)" />
+        <input type="text" id="end" placeholder="目的地 (例: 34.6937,135.5023)" />
+        <button onclick="getRoute()">ルートを計算</button>
+        <div id="map"></div>
+    </div>
+    
+    <script>
+        var map = L.map('map').setView([35.6895, 139.6917], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        var routeLayer;
+
+        function getRoute() {
+            let start = document.getElementById("start").value;
+            let end = document.getElementById("end").value;
+            let apiUrl = `https://ai-app2.onrender.com/route?start=${start}&end=${end}`;
+            
+            axios.get(apiUrl).then(response => {
+                if (routeLayer) map.removeLayer(routeLayer);
+                let route = response.data.route;
+                routeLayer = L.polyline(route, {color: 'blue', weight: 4}).addTo(map);
+                map.fitBounds(routeLayer.getBounds());
+            }).catch(error => {
+                alert("ルート取得に失敗しました。");
+            });
+        }
+    </script>
+</body>
+</html>
